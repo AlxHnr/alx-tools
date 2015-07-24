@@ -34,11 +34,11 @@ repeat_string()
 test $# -lt 4 || die "too many arguments"
 for arg; do
   if [[ "$arg" == "--help" ]]; then
-    echo "Usage: print-gentoo-splash [COLORS]"
+    echo "Usage: print-gentoo-splash [COLORS]..."
     echo "Prints a colorized Gentoo logo."
     echo
     echo "This script takes up to 3 color codes like e.g. \"1;34\","
-    echo "specifying a dark, a medium and a bright shade. The first"
+    echo "specifying a dark, a medium and a bright color. The first"
     echo "argument may also specify one of the colors listed below, in"
     echo "which case the last two arguments will be ignored."
     echo "  * red"
@@ -73,7 +73,8 @@ assert_color "$medium"
 assert_color "$bright"
 
 # Setup some variables.
-eval $(resize)
+LINES=$(stty size | grep -oE '^\S+')
+COLUMNS=$(stty size | grep -oE '\S+$')
 left_padding=$(repeat_string " " $(($COLUMNS/2 - 16)))
 vertical_padding=$(repeat_string "\n" $(($LINES/2 - 10)))
 
