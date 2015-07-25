@@ -5,15 +5,21 @@
 set -e
 
 # Various helper functions.
-function message()
+function message
 {
   echo -e "build-kernel: $@"
 }
 
-function die()
+function die
 {
   message "error: $@" >&2
   exit 1
+}
+
+# Lists all package atoms, which have files inside "/lib/modules/".
+function list_module_atoms
+{
+  equery b "/lib/modules" | grep -oE '^\S+' | sed -r 's,^,=,g'
 }
 
 # Setup environment.
@@ -102,18 +108,24 @@ if [[ -f ".config.old" && "$show_diff" == "yes" ]]; then
   fi
 fi
 
+# Build and install kernel.
 make "-j$(grep -c '^processor' /proc/cpuinfo)"
-if [[ ! -e "/lib/modules/$installed_version" ]] ; then
-  make modules_install
-elif [[ "$force_modules" == "yes" ]]; then
-  echo "Removing /lib/modules/$installed_version/"
-  rm -rf "/lib/modules/$installed_version"
-  make modules_install
-fi
-
-# Install self-booting kernel.
 mkdir -p /boot/
 mount /dev/sda1 /boot
 mkdir -p /boot/efi/boot/
 cp -v arch/x86/boot/bzImage /boot/efi/boot/bootx64.efi
 umount /boot
+
+# Ensure that modules are installed properly.
+if [[ ! -e "/lib/modules/$installed_version" ]] ; then
+  make modules_install
+  echo "Rebuilding packages with files in /lib/modules/"
+  list_module_atoms | xargs -d '\n' emerge -v1O
+elif [[ "$force_modules" == "yes" ]]; then
+  echo "Removing /lib/modules/$installed_version/"
+  rm -rf "/lib/modules/$installed_version"
+  make modules_install
+  echo "Reinstalling packages with files in /lib/modules/"
+  list_module_atoms | xargs -d '\n' emerge -qk1O
+  depmod
+fi
