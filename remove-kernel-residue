@@ -1,8 +1,22 @@
 #!/bin/bash
 
-# This script removes all kernels and modules, which are not used anymore
-# and do not belong to any package.
 set -e
+for arg; do
+  case "$arg" in
+    --help)
+      echo "Usage: remove-kernel-residue"
+      echo "Removes all kernels and modules, which are not used anymore"
+      echo "and do not belong to any package."
+      echo
+      echo "Takes no arguments other than \"--help\"."
+      exit
+      ;;
+    *)
+      echo "invalid argument: \"$arg\", try --help." >&2
+      exit 1
+      ;;
+  esac
+done
 
 # This function reads full directory paths from its input stream and
 # removes them recursively.
