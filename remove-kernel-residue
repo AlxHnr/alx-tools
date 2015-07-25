@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# This script removes all kernels and modules, which are not used anymore
+# and do not belong to any package.
+
+set -e
+
+# This function reads full directory paths from its input stream and
+# removes them recursively.
+function remove_dirs()
+{
+  while read dir; do
+    echo "Removing $dir/"
+    rm -rf "$dir"
+  done
+}
+
+# Collect all installed and running kernels.
+LFS="" kernels=$(uname -r &&
+  equery list 'sys-kernel/*' |
+  grep -o '[^\/]*-sources-.*$' |
+  sed -r 's,^([^-]+)-sources-([^-]+)(.*)$,\2-\1\3,g' |
+  sed -r 's,^(.*)-vanilla(-.*)?$,\1,g')
+
+ls -d /usr/src/* | grep -E '^/usr/src/linux-.*$' |
+  grep -vxF "$(LFS="" sed -r 's,^,/usr/src/linux-,g' <<< "$kernels")" |
+  remove_dirs
+
+ls -d /lib/modules/* |
+  grep -vxF "$(LFS="" sed -r 's,^,/lib/modules/,g' <<< "$kernels")" |
+  remove_dirs
