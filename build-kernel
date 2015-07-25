@@ -1,0 +1,100 @@
+#!/bin/bash
+
+set -e
+
+# Various helper functions.
+function message()
+{
+  echo -e "build-kernel: $@"
+}
+
+function die()
+{
+  message "error: $@" >&2
+  exit 1
+}
+
+# Setup environment.
+test -h /usr/src/linux || \
+  die "/usr/src/linux does not exist or is not a symbolic link"
+
+running_version=$(uname -r)
+installed_version=$(readlink /usr/src/linux)
+installed_version=${installed_version#linux-}
+show_diff=yes
+update=no
+
+# Process arguments.
+for arg; do
+  case "$arg" in
+    --help)
+      echo "Usage: build-kernel [OPTION]"
+      echo "A small tool for building and updating kernels."
+      echo
+      echo -e "  -u, --update\t\t\tQuit, if there is no kernel config" \
+        "to migrate."
+      echo -e "  -n, --no-diff\t\t\tDon't prompt the user to confirm the" \
+        "diff."
+      exit
+      ;;
+    -u|--update)
+      update=yes
+      ;;
+    -n|--no-diff)
+      show_diff=no
+      ;;
+    *)
+      die "unrecognized option \"$arg\", try --help."
+      ;;
+  esac
+done
+
+cd "/usr/src/linux-$installed_version/"
+
+if [[ "$update" == "yes" && -f .config ]];
+then message "nothing to update" && exit
+else
+  if [[ "$installed_version" != "$running_version" && ! -f .config ]]; then
+    message "migrating from $running_version to $installed_version"
+    cp -v "/usr/src/linux-$running_version/.config" .
+    make silentoldconfig
+  else
+    message "rebuilding current kernel ($installed_version)"
+  fi
+fi
+
+if [[ -f ".config.old" && "$show_diff" == "yes" ]]; then
+  diff_output=$(diff .config.old .config -I \
+    '^# Linux/x86 \([0-9]\+\.\)\{2\}[0-9]\+\([0-9A-Za-z\.\-]*\)\? Kernel Configuration$' || \
+    true)
+
+  if [[ -n "$diff_output" ]]; then
+    echo
+    echo "# Diff between \".config\" and \".config.old\":"
+    echo "------------------------------------------------------------"
+    echo "$diff_output"
+    echo "------------------------------------------------------------"
+    echo
+
+    while true; do
+      echo -n "proceed? (y/n) "
+      read line
+      case ${line,,} in
+        y|yes) break;;
+        n|no)  exit 1;;
+        *)
+          test -n "$line" &&
+            message "invalid input \"$line\"." &&
+            message "try \"y\", \"yes\", \"n\" or \"no\" instead." >&2 &&
+            echo
+      esac
+    done
+  fi
+fi
+
+make "-j$(grep -c '^processor' /proc/cpuinfo)"
+mkdir -p /boot/
+mount /dev/sda1 /boot
+mkdir -p /boot/efi/boot/
+cp -v arch/x86/boot/bzImage /boot/efi/boot/bootx64.efi
+umount /boot
