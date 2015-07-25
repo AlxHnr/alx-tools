@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# This script updates the entire system, the kernel, various config files
+# and also does some cleanups.
+
+set -e
+
+emerge --sync
+emerge -avuDN --with-bdeps=y @world
+emerge @preserved-rebuild
+revdep-rebuild --ignore
+etc-update
+emerge -c
+
+# update 'distfiles.exclude' to keep only the latest portage snapshot.
+eval $(emerge --info | grep DISTDIR)
+snapshot=$(echo "$DISTDIR"/portage-????????.tar.xz)
+snapshot=${snapshot##*"$DISTDIR/"}
+
+sed -r -i '/^portage-[0-9]{8}\.tar\.xz(\.gpgsig|\.md5sum)?$/d' \
+  /etc/eclean/distfiles.exclude
+
+echo "${snapshot}" >> "/etc/eclean/distfiles.exclude"
+echo "${snapshot}.gpgsig" >> "/etc/eclean/distfiles.exclude"
+echo "${snapshot}.md5sum" >> "/etc/eclean/distfiles.exclude"
+
+# remove unneeded packages.
+eclean-dist --destructive
+eclean-pkg --destructive
+echo
+
+build-kernel -u
+remove-kernel-residue
+fstrim -v /
