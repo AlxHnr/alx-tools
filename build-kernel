@@ -16,10 +16,16 @@ function die
   exit 1
 }
 
-# Lists all package atoms, which have files inside "/lib/modules/".
-function list_module_atoms
+# Installs the kernel modules and re-emerges all packages, which have files
+# in "/lib/modules". This function will pass all its arguments directly to
+# emerge.
+function install_modules
 {
-  equery b "/lib/modules" | grep -oE '^\S+' | sed -r 's,^,=,g'
+  make modules_install
+
+  message "re-emerging packages with files in \"/lib/modules/\""
+  equery b "/lib/modules" | grep -oE '^\S+' | sed -r 's,^,=,g' |
+  xargs -d '\n' emerge "$@"
 }
 
 # Setup environment.
@@ -103,6 +109,7 @@ if [[ -f ".config.old" && "$show_diff" == "yes" ]]; then
             message "invalid input \"$line\"." &&
             message "try \"y\", \"yes\", \"n\" or \"no\" instead." >&2 &&
             echo
+          ;;
       esac
     done
   fi
@@ -111,21 +118,15 @@ fi
 # Build and install kernel.
 make "-j$(grep -c '^processor' /proc/cpuinfo)"
 mkdir -p /boot
-mount /dev/sda1 /boot
+mount -v /dev/sda1 /boot
 mkdir -p /boot/efi/boot
 cp -v arch/x86/boot/bzImage /boot/efi/boot/bootx64.efi
-umount /boot
+umount -v /boot
 
 # Ensure that modules are installed properly.
-if [[ ! -e "/lib/modules/$installed_version" ]] ; then
-  make modules_install
-  echo "Rebuilding packages with files in /lib/modules/"
-  list_module_atoms | xargs -d '\n' emerge -v1O
+if [[ ! -e "/lib/modules/$installed_version" ]]; then
+  install_modules -v1O
 elif [[ "$force_modules" == "yes" ]]; then
-  echo "Removing /lib/modules/$installed_version/"
   rm -rf "/lib/modules/$installed_version"
-  make modules_install
-  echo "Reinstalling packages with files in /lib/modules/"
-  list_module_atoms | xargs -d '\n' emerge -qk1O
-  depmod
+  install_modules -qk1O
 fi
