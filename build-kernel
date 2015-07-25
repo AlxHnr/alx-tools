@@ -23,6 +23,7 @@ test -h /usr/src/linux || \
 running_version=$(uname -r)
 installed_version=$(readlink /usr/src/linux)
 installed_version=${installed_version#linux-}
+force_modules=no
 show_diff=yes
 update=no
 
@@ -37,6 +38,7 @@ for arg; do
         "to migrate."
       echo -e "  -n, --no-diff\t\t\tDon't prompt the user to confirm the" \
         "diff."
+      echo -e "  -m, --modules\t\t\tForce reinstallation of modules."
       exit
       ;;
     -u|--update)
@@ -44,6 +46,9 @@ for arg; do
       ;;
     -n|--no-diff)
       show_diff=no
+      ;;
+    -m|--modules)
+      force_modules=yes
       ;;
     *)
       die "invalid argument \"$arg\", try --help."
@@ -56,6 +61,9 @@ cd "/usr/src/linux-$installed_version/"
 if [[ "$update" == "yes" && -f .config ]];
 then message "nothing to update" && exit
 else
+  test -w "./" || \
+    die "no permissions to write to '/usr/src/linux-$installed_version/'"
+
   if [[ "$installed_version" != "$running_version" && ! -f .config ]]; then
     message "migrating from $running_version to $installed_version"
     cp -v "/usr/src/linux-$running_version/.config" .
@@ -95,6 +103,15 @@ if [[ -f ".config.old" && "$show_diff" == "yes" ]]; then
 fi
 
 make "-j$(grep -c '^processor' /proc/cpuinfo)"
+if [[ ! -e "/lib/modules/$installed_version" ]] ; then
+  make modules_install
+elif [[ "$force_modules" == "yes" ]]; then
+  echo "Removing /lib/modules/$installed_version/"
+  rm -rf "/lib/modules/$installed_version"
+  make modules_install
+fi
+
+# Install self-booting kernel.
 mkdir -p /boot/
 mount /dev/sda1 /boot
 mkdir -p /boot/efi/boot/
