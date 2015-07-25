@@ -2,7 +2,6 @@
 
 # This script removes all kernels and modules, which are not used anymore
 # and do not belong to any package.
-
 set -e
 
 # This function reads full directory paths from its input stream and

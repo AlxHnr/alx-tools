@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# This script builds and updates kernels. It will automatically migrate
+# kernel configurations and reinstall modules.
 set -e
 
 # Various helper functions.
