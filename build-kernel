@@ -110,9 +110,9 @@ fi
 
 # Build and install kernel.
 make "-j$(grep -c '^processor' /proc/cpuinfo)"
-mkdir -p /boot/
+mkdir -p /boot
 mount /dev/sda1 /boot
-mkdir -p /boot/efi/boot/
+mkdir -p /boot/efi/boot
 cp -v arch/x86/boot/bzImage /boot/efi/boot/bootx64.efi
 umount /boot
 
