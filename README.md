@@ -2,6 +2,9 @@ A collection of scripts and hacks i have written over the years, mostly for
 maintaining my Gentoo system. This is free software, released into the
 public domain. See the LICENSE file for more informations.
 
+These tools can be installed directly from my
+[Gentoo overlay](https://github.com/AlxHnr/gentoo-overlay).
+
 ## Provided tools
 
 Most of these tools have no configuration file and must be configured by
@@ -23,8 +26,8 @@ to `/boot` during installation.
 
 ### remove-kernel-residue
 
-This script removes all kernels and modules, which are not used anymore and
-do not belong to any package.
+Removes all kernel files and modules, which are not needed anymore and do
+not belong to any installed package.
 
 ### print-gentoo-splash
 
