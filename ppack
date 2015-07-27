@@ -31,7 +31,7 @@ for arg; do
       echo -e "  -r, --remove-archives\t\tRemove previously existing" \
         "archives for each"
       echo -e "\t\t\t\tdirectory."
-      echo -e "      --help\t\t\tPrint this help and exit."
+      echo -e "      --help\t\t\tDisplay this help and exit."
       exit
       ;;
     --dest=*)

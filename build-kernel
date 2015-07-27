@@ -51,6 +51,7 @@ for arg; do
       echo -e "  -n, --no-diff\t\t\tDon't prompt the user to confirm the" \
         "diff."
       echo -e "  -m, --modules\t\t\tForce reinstallation of modules."
+      echo -e "      --help\t\t\tDisplay this help and exit."
       exit
       ;;
     -u|--update)
