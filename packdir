@@ -107,12 +107,6 @@ for dir in "${directories[@]}"; do
         exclude+=("$(sed -r 's,^(.*[^/])/*$,--exclude=\1,g' <<< "$file")");
       done
   else
-    for vcs in svn cvs hg bzr; do
-      test -d "$project_name/.$vcs" &&
-        echo "${yellow}warning${reset}:" \
-        "ignoring VCS informations in \"$project_name\"";
-    done
-
     date_string=$(find "$project_name" -mindepth 1 -exec stat -c "%Y" {} ';' |
       sort -nr | head -n1)
 
