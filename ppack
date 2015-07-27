@@ -52,14 +52,14 @@ test ${#directories[@]} == 0 && die "no directories specified"
 
 # Define some color codes.
 blue="$(tput bold)$(tput setf 1)"
-green="$(tput bold)$(tput setf 2)"
-red="$(tput bold)$(tput setf 4)"
-magenta="$(tput bold)$(tput setf 5)"
-yellow="$(tput bold)$(tput setf 6)"
+green="$(tput setf 2)"
+red="$(tput setf 4)"
+magenta="$(tput setf 5)"
+yellow="$(tput setf 6)"
 reset=$(tput sgr0)
 
-# Returns the timestamp of the latest file in the given directory. If no
-# file could be found, it falls back to the directories timestamp.
+# Finds the most recent file in the given directory and prints its
+# modification date. This function will ignore VCS directories.
 #
 # $1 A valid directory path.
 function find_latest_timestamp
@@ -68,6 +68,8 @@ function find_latest_timestamp
     ! -path "*/.svn/*" ! -path "*/.bzr/*" ! -path "*/.cvs/*" \
     -exec stat -c "%Y" {} ';' | sort -nr | head -n1)
 
+  # If no timestamp could be found, use the timestamp of the specified
+  # directory.
   test -n "$timestamp" || timestamp=$(stat -c "%Y" "$1")
   date -d "@$timestamp" +"%d-%m-%y-%H:%M:%S"
 }
@@ -89,30 +91,17 @@ for dir in "${directories[@]}"; do
       do
         exclude+=("$(sed -r 's,^(.*[^/])/*$,--exclude=\1,g' <<< "$file")");
       done
-
-    # Summarize git status.
-    git_status=$(LANG=en git -C "$project_name" status 2>/dev/null)
-    case "$git_status" in
-      *Changes\ not\ staged\ for\ commit*)
-        echo "${magenta}unstaged changes${reset}: $project_name";;
-      *Changes\ to\ be\ committed*)
-        echo "${yellow}uncommitted changes${reset}: $project_name";;
-      *Your\ branch\ is\ ahead\ of\ \'origin/master\'\ by\ *\ commits*)
-        echo "${green}ready to push${reset}: $project_name";;
-      *untracked\ files*)
-        echo "${red}untracked files${reset}: $project_name";;
-    esac
   else
-    echo
+    date_string=$(find_latest_timestamp "$project_name")
   fi
 
   archive_path="${dest}/${project_name}-${date_string}.tar.xz"
-  if [[ ! -e "$archive_path" ]]; then
-    [[ "$remove_archives" == "yes" ]] &&
-      { rm -v "$dest/$project_name"-??-??-??-??:??:??.tar.xz 2>/dev/null ||
-        true; }
+  test -e "$archive_path" && continue
 
-    tar -c --xz -f "$archive_path" "$project_name" "${exclude[@]}" &&
-      echo "${blue}packed${reset} $project_name"
-  fi
+  [[ "$remove_archives" == "yes" ]] &&
+    { rm -v "$dest/$project_name"-??-??-??-??:??:??.tar.xz 2>/dev/null ||
+      true; }
+
+  tar -c --xz -f "$archive_path" "$project_name" "${exclude[@]}" &&
+    echo "${blue}packed${reset} $project_name"
 done
