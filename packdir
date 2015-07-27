@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# This script creates directory snapshots.
 set -e
 
 # Process arguments.
@@ -10,6 +9,23 @@ remove_archives=no
 for arg; do
   case "$arg" in
     --help)
+      echo "Usage: packdir [PATHS]..."
+      echo "A small tool for creating directory snapshots."
+      echo
+      echo "This script will pack the given directories and append a"
+      echo "timestamp to the archive name. The timestamp will be either"
+      echo "the modification time of the newest file, or of the latest"
+      echo "commit."
+      echo
+      echo "All arguments will be interpreted as absolute or relative"
+      echo "paths. The only exception are the following arguments:"
+      echo -e "      --dest=PATH\t\tThe directory in which the archive" \
+        "should be"
+      echo -e "\t\t\t\tcreated. Defaults to the current directory."
+      echo -e "  -r, --remove-archives\t\tRemove previously existing" \
+        "archives for each"
+      echo -e "\t\t\t\tdirectory."
+      echo -e "      --help\t\t\tPrint this help and exit."
       exit
       ;;
     --dest=*)
