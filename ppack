@@ -91,16 +91,16 @@ for dir in "${directories[@]}"; do
       done
 
     # Summarize git status.
-    git_status=$(LANG=en git -C "$1" status 2>/dev/null)
+    git_status=$(LANG=en git -C "$project_name" status 2>/dev/null)
     case "$git_status" in
       *Changes\ not\ staged\ for\ commit*)
-        echo "${magenta}unstaged changes${reset}: $1";;
+        echo "${magenta}unstaged changes${reset}: $project_name";;
       *Changes\ to\ be\ committed*)
-        echo "${yellow}uncommitted changes${reset}: $1";;
+        echo "${yellow}uncommitted changes${reset}: $project_name";;
       *Your\ branch\ is\ ahead\ of\ \'origin/master\'\ by\ *\ commits*)
-        echo "${green}ready to push${reset}: $1";;
+        echo "${green}ready to push${reset}: $project_name";;
       *untracked\ files*)
-        echo "${red}untracked files${reset}: $1";;
+        echo "${red}untracked files${reset}: $project_name";;
     esac
   else
     echo
