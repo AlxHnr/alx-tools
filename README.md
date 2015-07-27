@@ -29,6 +29,11 @@ to `/boot` during installation.
 Removes all kernel files and modules, which are not needed anymore and do
 not belong to any installed package.
 
+### ppack
+
+Creates project archives. It will append the timestamp of either the newest
+file or the latest commit to the archive name.
+
 ### print-gentoo-splash
 
 Prints a centered Gentoo logo in various colors.
