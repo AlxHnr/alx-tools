@@ -32,7 +32,8 @@ not belong to any installed package.
 ### ppack
 
 Creates project archives. It will append the timestamp of either the newest
-file or the latest commit to the archive name.
+file or the latest commit to the archive name. Only git is supported. If
+git is not installed, it will fallback to searching the most recent file.
 
 ### print-gentoo-splash
 
