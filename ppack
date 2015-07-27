@@ -5,6 +5,7 @@ set -e
 function die
 {
   echo "ppack: error: $@" >&2
+  exit 1
 }
 
 # Process arguments.
@@ -42,21 +43,13 @@ for arg; do
       remove_archives=yes
       ;;
     *)
-      test -d "$arg" || die "invalid directory: \"$dir\""
+      test -d "$arg" || die "invalid directory: \"$arg\""
       directories+=("$arg")
       ;;
   esac
 done
 
 test ${#directories[@]} == 0 && die "no directories specified"
-
-# Define some color codes.
-blue="$(tput bold)$(tput setf 1)"
-green="$(tput setf 2)"
-red="$(tput setf 4)"
-magenta="$(tput setf 5)"
-yellow="$(tput setf 6)"
-reset=$(tput sgr0)
 
 # Finds the most recent file in the given directory and prints its
 # modification date. This function will ignore VCS directories.
@@ -68,8 +61,8 @@ function find_latest_timestamp
     ! -path "*/.svn/*" ! -path "*/.bzr/*" ! -path "*/.cvs/*" \
     -exec stat -c "%Y" {} ';' | sort -nr | head -n1)
 
-  # If no timestamp could be found, use the timestamp of the specified
-  # directory.
+  # If no timestamp could be found, use the timestamp of the directory
+  # itself.
   test -n "$timestamp" || timestamp=$(stat -c "%Y" "$1")
   date -d "@$timestamp" +"%d-%m-%y-%H:%M:%S"
 }
@@ -82,8 +75,9 @@ for dir in "${directories[@]}"; do
 
   if [[ -d "$project_name/.git" ]]; then
     date_string=$(git -C "$project_name" show -s --format='%ci' HEAD 2>/dev/null |
-    sed -E 's,^..([0-9]{2})-([0-9]{2})-([0-9]{2}) (\S+).*$,\3-\2-\1-\4,g' ||
-      find_latest_timestamp "$project_name")
+    sed -E 's,^..([0-9]{2})-([0-9]{2})-([0-9]{2}) (\S+).*$,\3-\2-\1-\4,g')
+    test -n "$date_string" ||
+      date_string=$(find_latest_timestamp "$project_name")
 
     # Extract and expand paths in .gitignore.
     test -f "$project_name/.gitignore" &&
@@ -103,5 +97,5 @@ for dir in "${directories[@]}"; do
       true; }
 
   tar -c --xz -f "$archive_path" "$project_name" "${exclude[@]}" &&
-    echo "${blue}packed${reset} $project_name"
+    echo "packed: $project_name"
 done
