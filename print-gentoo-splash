@@ -4,8 +4,7 @@
 # avoid additional dependencies and was intended to be used inside the
 # Linux console running a simple shell.
 
-# Prints the given error messages and terminates the program with an error
-# message.
+# Print the given error message and terminates the program with failure.
 die()
 {
   echo "error: $@" >&2
