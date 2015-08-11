@@ -71,11 +71,15 @@ for dir in "${directories[@]}"; do
   project_path=$(readlink -f "$dir")
   project_name=$(basename "$project_path")
   cd "$(dirname "$project_path")"
+  unset extra_info
   exclude=()
 
   if [[ -d "$project_name/.git" ]]; then
     date_string=$(git -C "$project_name" show -s --format='%ci' HEAD 2>/dev/null |
     sed -E 's,^..([0-9]{2})-([0-9]{2})-([0-9]{2}) (\S+).*$,\3-\2-\1-\4,g')
+    test -n "$date_string" &&
+      extra_info="$(git -C "$project_name" log | grep '^commit' | wc -l)" &&
+      extra_info=", ${extra_info} commits"
     test -n "$date_string" ||
       date_string=$(find_latest_timestamp "$project_name")
 
@@ -96,6 +100,7 @@ for dir in "${directories[@]}"; do
     { rm -v "$dest/$project_name"-??-??-??-??:??:??.tar.xz 2>/dev/null ||
       true; }
 
-  tar -c --xz -f "$archive_path" "$project_name" "${exclude[@]}" &&
-    echo "packed: $project_name"
+  tar -c --xz -f "$archive_path" "$project_name" "${exclude[@]}"
+  extra_info="$(du -h "$archive_path" | grep -oE '^\S+')${extra_info}"
+  echo "packed: $project_name ($extra_info)"
 done
