@@ -4,22 +4,8 @@
 # config files. It performs some additional cleanups.
 set -e
 
-# Sync the portage tree while keeping the latest portage snapshot in
-# $DISTDIR.
-emerge-webrsync --keep
-
-eval $(emerge --info | grep '^DISTDIR')
-snapshot=$(echo "$DISTDIR"/portage-????????.tar.xz)
-snapshot=${snapshot##*"$DISTDIR/"}
-
-sed -r -i '/^portage-[0-9]{8}\.tar\.xz(\.gpgsig|\.md5sum)?$/d' \
-  /etc/eclean/distfiles.exclude
-
-echo "${snapshot}" >> "/etc/eclean/distfiles.exclude"
-echo "${snapshot}.gpgsig" >> "/etc/eclean/distfiles.exclude"
-echo "${snapshot}.md5sum" >> "/etc/eclean/distfiles.exclude"
-
 # Update the system.
+emerge --sync
 emerge -auDN --with-bdeps=y @world
 emerge @preserved-rebuild
 revdep-rebuild --ignore
