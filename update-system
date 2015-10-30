@@ -20,7 +20,7 @@ echo "${snapshot}.gpgsig" >> "/etc/eclean/distfiles.exclude"
 echo "${snapshot}.md5sum" >> "/etc/eclean/distfiles.exclude"
 
 # Update the system.
-emerge -avuDN --with-bdeps=y @world
+emerge -auDN --with-bdeps=y @world
 emerge @preserved-rebuild
 revdep-rebuild --ignore
 build-kernel --update
