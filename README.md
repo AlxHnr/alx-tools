@@ -54,16 +54,16 @@ For this to work, the following conditions must be met:
   files in the distributed archive have not been tampered with, before
   generating its manifest.
 
-#### Usage example
+##### Usage example
 
 If you have your overlay in the same directory as your project:
 
-`
+```
 ~/Projects/my-overlay/category/package-name/...-0.1.0.ebuild
 ~/Projects/package-name/... (Currently at v0.1.1)
-`
+```
 
-Now just run:
+You just need to cd into the overlays root directory and run this script:
 
 ```sh
 cd ~/Projects/my-overlay
