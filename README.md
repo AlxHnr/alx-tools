@@ -35,6 +35,41 @@ Creates project archives. It will append the timestamp of either the newest
 file or the latest commit to the archive name. Only git is supported. If
 git is not installed, it will fallback to searching the most recent file.
 
+### sync-overlay-with-projects
+
+Renames the ebuilds in your overlay to match the git tags of your projects.
+It will also update the manifests and commit and push the changes.
+
+For this to work, the following conditions must be met:
+
+* The overlay must contain an ebuild with a version suffix other than
+  "-9999". If it contains two ebuilds that fulfill this requirement, e.g.
+  "-0.1.0" and "-0.1.1", it will pick one of them and may overwrite the
+  other.
+* The archive in the ebuilds SRC\_URI must be available for download. It
+  must have a name like "foo-0.1.0.tar.gz" after being fetched via portage.
+* The projects name must be the same as its packages name.
+* The projects working tree must be at the exact state of the tag to which
+  the ebuild should be renamed to. This is required to assert that the
+  files in the distributed archive have not been tampered with, before
+  generating its manifest.
+
+#### Usage example
+
+If you have your overlay in the same directory as your project:
+
+`
+~/Projects/my-overlay/category/package-name/...-0.1.0.ebuild
+~/Projects/package-name/... (Currently at v0.1.1)
+`
+
+Now just run:
+
+```sh
+cd ~/Projects/my-overlay
+sync-overlay-with-projects
+```
+
 ### print-gentoo-splash
 
 Prints a centered Gentoo logo in various colors.
