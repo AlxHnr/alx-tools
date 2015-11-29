@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# This script updates ebuild names to match the latest git tags of your
-# projects. It also updates manifests and tries to commit and push the
-# changes. It must be run from the root directory of the overlay.
 set -e
 
 function die
@@ -10,6 +7,32 @@ function die
   echo "error: $@" >&2
   exit 1
 }
+
+# Process arguments.
+project_search_path=".."
+test $# -gt 1 && die "too many arguments"
+if [[ $# -eq 1 ]]; then
+  case "$1" in
+    --help)
+      echo "Usage: sync-overlay-with-projects [PROJECT-SEARCH-PATH]"
+      echo "A tool for rotating ebuilds in overlays."
+      echo
+      echo "This script updates ebuild names to match the latest git"
+      echo "tags of your projects. It also updates manifests and tries"
+      echo "to commit and push the changes. It must be run from the root"
+      echo "directory of the overlay."
+      echo
+      echo "This script takes one optional argument, containing the"
+      echo "directory which will be searched for projects. If not"
+      echo "specified, it defaults to \"..\"."
+      exit
+      ;;
+    *)
+      test -d "$1" || die "not a directory: \"$1\""
+      project_search_path="$1"
+      ;;
+  esac
+fi
 
 # Associates package names with the relative path to their ebuild.
 declare -A paths
@@ -37,10 +60,10 @@ unset ebuilds_updated
 
 # Sync package ebuilds with projects having the same name.
 for package in "${!paths[@]}"; do
-  test -d "../$package" || continue
+  test -d "$project_search_path/$package" || continue
 
-  latest_tag=$(git -C "../$package" tag | sort | tail -n1 | \
-    sed -r 's,^v?(.*)$,\1,g')
+  latest_tag=$(git -C "$project_search_path/$package" tag | sort | \
+    tail -n1 | sed -r 's,^v?(.*)$,\1,g')
 
   test -z "$latest_tag" && continue
   [[ "${versions["$package"]}" == "$latest_tag" ]] && continue
@@ -57,10 +80,11 @@ for package in "${!paths[@]}"; do
   (cd "$tmp_dir" && tar xf "$package-$latest_tag.tar.gz")
 
   diff_command="diff -rq"
-  test -f "../$package/.gitignore" && \
-    diff_command+=" -X ../$package/.gitignore"
-  $diff_command -x ".git" "../$package" "$tmp_dir/$package-$latest_tag" \
-    || die "distributed archive contains modified source code"
+  test -f "$project_search_path/$package/.gitignore" && \
+    diff_command+=" -X $project_search_path/$package/.gitignore"
+  $diff_command -x ".git" "$project_search_path/$package" \
+    "$tmp_dir/$package-$latest_tag" || \
+    die "distributed archive contains modified source code"
 
   # Commit the changes.
   git reset
