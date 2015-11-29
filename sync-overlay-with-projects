@@ -31,7 +31,6 @@ done < <(find . -type f -regex '^.*\.ebuild$' | grep -v '999\.ebuild$')
 # be downloaded to. This is required for generating the manifest without
 # having write access to $DISTDIR.
 tmp_dir=$(mktemp -d)
-chmod 600 "$tmp_dir"
 
 # Will be set to true, if at least one ebuild was updated.
 unset ebuilds_updated
@@ -51,17 +50,21 @@ for package in "${!paths[@]}"; do
   new_ebuild_path="$ebuild_directory/${package}-${latest_tag}.ebuild"
 
   mv "$old_ebuild_path" "$new_ebuild_path"
-  DISTDIR="$tmp_dir" ebuild "$new_ebuild_path" manifest
+  DISTDIR="$tmp_dir" ebuild "$new_ebuild_path" manifest --force
 
   # Compare the package downloaded trough the ebuild to the source code in
   # the projects directory.
   (cd "$tmp_dir" && tar xf "$package-$latest_tag.tar.gz")
-  diff -rq -X "../$package/.gitignore" -x ".git" \
-    "$tmp_dir/$package-$latest_tag" "../$package" || \
-    die "distributed archive contains modified source code"
 
+  diff_command="diff -rq"
+  test -f "../$package/.gitignore" && \
+    diff_command+=" -X ../$package/.gitignore"
+  $diff_command -x ".git" "../$package" "$tmp_dir/$package-$latest_tag" \
+    || die "distributed archive contains modified source code"
+
+  # Commit the changes.
   git reset
-  git rm "$old_ebuild_path"
+  git rm --ignore-unmatch "$old_ebuild_path"
   git add "$new_ebuild_path" "$ebuild_directory/Manifest"
   git commit -m "Updated $package to $latest_tag"
   ebuilds_updated=true
