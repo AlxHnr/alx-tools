@@ -34,6 +34,13 @@ if [[ $# -eq 1 ]]; then
   esac
 fi
 
+# Lists all ebuilds found in the current overlay.
+function find_ebuilds
+{
+  find . -mindepth 3 -maxdepth 3 -type f -regex '^.*\.ebuild$' | \
+    grep -v '999\.ebuild$'
+}
+
 # Associates package names with the relative path to their ebuild.
 declare -A paths
 
@@ -48,7 +55,7 @@ while read path; do
 
   ebuild_version=$(sed -r "s,.*\/$package-(.*)\.ebuild$,\1,g" <<< "$path")
   versions["$package"]="$ebuild_version"
-done < <(find . -type f -regex '^.*\.ebuild$' | grep -v '999\.ebuild$')
+done < <(find_ebuilds)
 
 # The temporary directory to which the archive specified in the ebuild will
 # be downloaded to. This is required for generating the manifest without
