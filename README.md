@@ -21,8 +21,7 @@ Builds and updates kernels. It will automatically migrate kernel
 configurations and reinstall modules.
 
 **Note**: This script assumes that your kernel can boot itself and will
-install it to `/boot/efi/boot/bootx64.efi`. It will also mount `/dev/sda1`
-to `/boot` during installation.
+install it to `/boot/efi/boot/bootx64.efi` after mounting `/boot`.
 
 ### remove-kernel-residue
 
