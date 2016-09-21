@@ -69,8 +69,8 @@ unset ebuilds_updated
 for package in "${!paths[@]}"; do
   test -d "$project_search_path/$package" || continue
 
-  latest_tag=$(git -C "$project_search_path/$package" tag | sort | \
-    tail -n1 | sed -r 's,^v?(.*)$,\1,g')
+  latest_tag=$(git -C "$project_search_path/$package" describe \
+    --abbrev=0 --tags | sed -r 's/^v//g')
 
   test -z "$latest_tag" && continue
   [[ "${versions["$package"]}" == "$latest_tag" ]] && continue
