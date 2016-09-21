@@ -1,0 +1,42 @@
+#!/bin/sh -e
+
+# Synchronizes two nano-backup repositories.
+# Usage: nb-sync current/ to old/
+
+die()
+{
+  echo "nb-sync: error: $@" >&2
+  exit 1
+}
+
+# Process arguments.
+test $# -ge 1         || die "no repository specified"
+test -d "$1"          || die "not a valid directory: \"$1\""
+test -f "$1/config"   || die "repository has no valid config file: \"$1\""
+test -f "$1/metadata" || die "repository has no valid metadata: \"$1\""
+test $# -ge 2         || die "usage: nb-sync current/ to old/"
+test "$2" = "to"      || die "usage: nb-sync current/ to old/"
+test $# -ge 3         || die "no target repository specified"
+test -d "$3"          || die "not a valid directory: \"$3\""
+test $# -eq 3         || die "too many arguments"
+current="$1"
+old="$3"
+
+# Main code.
+if test -e "$old/config"; then
+  mv "$old/config" "$old/config.bak"
+fi
+if test -e "$old/metadata"; then
+  mv "$old/metadata" "$old/metadata.bak" ||
+    {
+      mv "$old/config.bak" "$old/config"
+      exit 1
+    }
+fi
+
+cp -rn "$current"/* "$old/" && nb "$old" gc ||
+  {
+    mv "$old/metadata.bak" "$old/metadata"
+    mv "$old/config.bak" "$old/config"
+    exit 1
+  }

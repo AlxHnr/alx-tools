@@ -34,6 +34,17 @@ Creates project archives. It will append the timestamp of either the newest
 file or the latest commit to the archive name. Only git is supported. If
 git is not installed, it will fallback to searching the most recent file.
 
+### nb-sync
+
+Synchronizes two [nano-backup](https://github.com/AlxHnr/nano-backup)
+repositories.
+
+Usage:
+
+```sh
+nb-sync current/ to old/
+```
+
 ### sync-overlay-with-projects
 
 Renames the ebuilds in your overlay to match the git tags of your projects.
