@@ -25,7 +25,7 @@ function install_modules
 
   message "re-emerging packages with files in \"/lib/modules/\""
   equery b "/lib/modules" | grep -oE '^\S+' | sed -r 's,^,=,g' |
-  xargs -d '\n' emerge "$@"
+  xargs -r -d '\n' emerge "$@"
 }
 
 # Setup environment.
