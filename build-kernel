@@ -121,6 +121,8 @@ make "-j$(grep -c '^processor' /proc/cpuinfo)"
 mkdir -p /boot
 mount -v /boot
 mkdir -p /boot/efi/boot
+test ! -e /boot/efi/boot/bootx64.efi ||
+  mv /boot/efi/boot/bootx64.efi{,.bak}
 cp -v arch/x86/boot/bzImage /boot/efi/boot/bootx64.efi
 umount -v /boot
 
