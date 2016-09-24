@@ -10,11 +10,6 @@ These tools can be installed directly from my
 Most of these tools have no configuration file and must be configured by
 modifying their source code.
 
-### update-system
-
-Updates the entire system, including the kernel and various config files.
-It performs some additional cleanups.
-
 ### build-kernel
 
 Builds and updates kernels. It will automatically migrate kernel
