@@ -23,20 +23,22 @@ current="$1"
 old="$3"
 
 # Main code.
-if test -e "$old/config"; then
-  mv "$old/config" "$old/config.bak"
-fi
-if test -e "$old/metadata"; then
-  mv "$old/metadata" "$old/metadata.bak" ||
-    {
-      mv "$old/config.bak" "$old/config"
-      exit 1
-    }
-fi
+echo "synchronizing \"$current\" to \"$old\""
 
-cp -rn "$current"/* "$old/" && nb "$old" gc ||
+# Run gc in current repository to make sure its metadata is not broken.
+nb "$current" gc
+
+test ! -e "$old/config"   || cp "$old/config" "$old/config.bak"
+test ! -e "$old/metadata" || cp "$old/metadata" "$old/metadata.bak"
+rm "$old/config" "$old/metadata"
+
+cp -rn "$current"/* "$old/" ||
   {
     mv "$old/metadata.bak" "$old/metadata"
     mv "$old/config.bak" "$old/config"
-    exit 1
+    die "failed to copy files from \"$current\" to \"$old\""
   }
+
+test ! -e "$old/config.bak"   || rm "$old/config.bak"
+test ! -e "$old/metadata.bak" || rm "$old/metadata.bak"
+nb "$old" gc
