@@ -16,7 +16,7 @@ force_overwrite=no
 for arg; do
   case "$arg" in
     --help)
-      echo "Usage: packdir [PATHS]..."
+      echo "Usage: ppack [PATHS]..."
       echo "A tool for creating project snapshots."
       echo
       echo "This script will pack the given directories and append a"
