@@ -72,8 +72,9 @@ function find_latest_timestamp
   date -d "@$timestamp" +"%d-%m-%y-%H:%M:%S"
 }
 
-for dir in "${directories[@]}"; do
-  project_path=$(readlink -f "$dir")
+function packdir
+(
+  project_path=$(readlink -f "$1")
   project_name=$(basename "$project_path")
   cd "$(dirname "$project_path")"
   unset extra_info
@@ -109,4 +110,6 @@ for dir in "${directories[@]}"; do
   tar -c --xz -f "$archive_path" "$project_name" "${exclude[@]}"
   extra_info="$(du -h "$archive_path" | grep -oE '^\S+')${extra_info}"
   echo "packed: $project_name ($extra_info)"
-done
+)
+
+for dir in "${directories[@]}"; do packdir "$dir"; done
