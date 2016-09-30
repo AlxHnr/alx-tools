@@ -94,13 +94,6 @@ function packdir
       extra_info=", ${extra_info} commits"
     test -n "$date_string" ||
       date_string=$(find_latest_timestamp "$project_name")
-
-    # Extract and expand paths in .gitignore.
-    test -f "$project_name/.gitignore" &&
-      for file in $(sed -r "s,^(.*)$,$project_name/\1,g" "$project_name/.gitignore");
-      do
-        exclude+=("$(sed -r 's,^(.*[^/])/*$,--exclude=\1,g' <<< "$file")");
-      done
   else
     date_string=$(find_latest_timestamp "$project_name")
   fi
@@ -112,7 +105,16 @@ function packdir
   [[ "$remove_archives" == "yes" ]] &&
     rm -v "$dest/$project_name"-??-??-??-??:??:??.tar.* 2>/dev/null
 
-  tar -c --xz -f "$archive_path" "$project_name" "${exclude[@]}"
+  test -d "$project_name/.git" &&
+    find "$project_name" -name .gitignore |
+    while read gitignore_path; do
+      ignore_root=$(dirname "$gitignore_path")
+      LANG=en git -C "$ignore_root" clean -ndX |
+       sed 's/^Would remove //' | sed 's/\/*$//' |
+       while read line; do echo "--exclude=$ignore_root/$line"; done
+    done |
+    xargs -d '\n' tar caf "$archive_path" "$project_name"
+
   extra_info="$(du -h "$archive_path" | grep -oE '^\S+')${extra_info}"
   echo "packed: $project_name ($extra_info)"
 )
