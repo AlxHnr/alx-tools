@@ -13,6 +13,7 @@ dest=$(pwd)
 directories=()
 remove_archives=no
 force_overwrite=no
+suffix=xz
 for arg; do
   case "$arg" in
     --help)
@@ -29,6 +30,8 @@ for arg; do
       echo -e "      --dest=PATH\t\tThe directory in which the archive" \
         "should be"
       echo -e "\t\t\t\tcreated. Defaults to the current directory."
+      echo -e "      --suffix=SUFFIX\t\tArchive extension to pass to" \
+        "tar. Default: \"xz\"."
       echo -e "  -r, --remove-archives\t\tRemove previously existing" \
         "archives."
       echo -e "  -f, --force\t\t\tForce overwriting of the current" \
@@ -40,6 +43,9 @@ for arg; do
       new_dest=${arg#--dest=}
       dest=$(readlink -f "$new_dest" || true)
       test ! -d "$dest" && die "invalid path: \"$new_dest\""
+      ;;
+    --suffix=*)
+      suffix=${arg#--suffix=}
       ;;
     -r|--remove-archives)
       remove_archives=yes
@@ -99,13 +105,12 @@ function packdir
     date_string=$(find_latest_timestamp "$project_name")
   fi
 
-  archive_path="${dest}/${project_name}-${date_string}.tar.xz"
+  archive_path="${dest}/${project_name}-${date_string}.tar.${suffix}"
   test -e "$archive_path" && [[ "$force_overwrite" == "no" ]] &&
     continue
 
   [[ "$remove_archives" == "yes" ]] &&
-    { rm -v "$dest/$project_name"-??-??-??-??:??:??.tar.xz 2>/dev/null ||
-      true; }
+    rm -v "$dest/$project_name"-??-??-??-??:??:??.tar.* 2>/dev/null
 
   tar -c --xz -f "$archive_path" "$project_name" "${exclude[@]}"
   extra_info="$(du -h "$archive_path" | grep -oE '^\S+')${extra_info}"
