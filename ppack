@@ -1,6 +1,4 @@
-#!/bin/bash
-
-set -e
+#!/bin/bash -e
 
 function die
 {
@@ -102,8 +100,9 @@ function packdir
   test -e "$archive_path" && [[ "$force_overwrite" == "no" ]] &&
     continue
 
-  [[ "$remove_archives" == "yes" ]] &&
-    rm -v "$dest/$project_name"-??-??-??-??:??:??.tar.* 2>/dev/null
+  if test "$remove_archives" = "yes"; then
+    rm -v "$dest/$project_name"-??-??-??-??:??:??.tar.* 2>/dev/null || true
+  fi
 
   test -d "$project_name/.git" &&
     find "$project_name" -name .gitignore |
