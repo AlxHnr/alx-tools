@@ -104,15 +104,16 @@ function packdir
     rm -v "$dest/$project_name"-??-??-??-??:??:??.tar.* 2>/dev/null || true
   fi
 
-  test -d "$project_name/.git" &&
-    find "$project_name" -name .gitignore |
-    while read gitignore_path; do
-      ignore_root=$(dirname "$gitignore_path")
-      LANG=en git -C "$ignore_root" clean -ndX |
-       sed 's/^Would remove //' | sed 's/\/*$//' |
-       while read line; do echo "--exclude=$ignore_root/$line"; done
-    done |
-    xargs -d '\n' tar caf "$archive_path" "$project_name"
+  {
+    test -d "$project_name/.git" &&
+      find "$project_name" -name .gitignore |
+      while read gitignore_path; do
+        ignore_root=$(dirname "$gitignore_path")
+        LANG=en git -C "$ignore_root" clean -ndX |
+         sed 's/^Would remove //' | sed 's/\/*$//' |
+         while read line; do echo "--exclude=$ignore_root/$line"; done
+      done
+  } | xargs -d '\n' tar caf "$archive_path" "$project_name"
 
   extra_info="$(du -h "$archive_path" | grep -oE '^\S+')${extra_info}"
   echo "packed: $project_name ($extra_info)"
