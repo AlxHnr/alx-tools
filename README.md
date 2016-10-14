@@ -75,6 +75,10 @@ cd ~/Projects/my-overlay
 sync-overlay-with-projects
 ```
 
+### clear-colors-getty
+
+My Vim [colorscheme](https://github.com/AlxHnr/clear_colors) for the TTY.
+
 ### print-gentoo-splash
 
 Prints a centered Gentoo logo in various colors.

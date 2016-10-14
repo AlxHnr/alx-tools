@@ -1,0 +1,19 @@
+#!/bin/sh
+
+printf "\e]P0262626"
+printf "\e]P1ff5f5f"
+printf "\e]P287af5f"
+printf "\e]P3d7af87"
+printf "\e]P44a5f75"
+printf "\e]P5af87af"
+printf "\e]P65fd7d7"
+printf "\e]P7bcbcbc"
+printf "\e]P8949494"
+printf "\e]P9ff5f5f"
+printf "\e]Pa87af5f"
+printf "\e]Pbd7af87"
+printf "\e]Pc87afd7"
+printf "\e]Pdaf87af"
+printf "\e]Pe5fd7d7"
+printf "\e]Pfbcbcbc"
+clear
