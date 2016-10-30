@@ -123,7 +123,15 @@ mount -v /boot
 mkdir -p /boot/efi/boot
 test ! -e /boot/efi/boot/bootx64.efi ||
   mv /boot/efi/boot/bootx64.efi{,.bak}
-cp -v arch/x86/boot/bzImage /boot/efi/boot/bootx64.efi
+
+if test -f /etc/efikeys/db.key && test -f /etc/efikeys/db.crt; then
+  sbsign --key /etc/efikeys/db.key --cert /etc/efikeys/db.crt \
+    arch/x86/boot/bzImage --output /boot/efi/boot/bootx64.efi
+  sbverify --cert /etc/efikeys/db.crt /boot/efi/boot/bootx64.efi
+else
+  cp -v arch/x86/boot/bzImage /boot/efi/boot/bootx64.efi
+fi
+
 umount -v /boot
 
 # Ensure that modules are installed properly.

@@ -13,7 +13,8 @@ modifying their source code.
 ### build-kernel
 
 Builds and updates kernels. It will automatically migrate kernel
-configurations and reinstall modules.
+configurations and reinstall modules. If `/etc/efikeys` exists and contains
+the files _db.key_ and _db.crt_, they will be used for signing the kernel.
 
 **Note**: This script assumes that your kernel can boot itself and will
 install it to `/boot/efi/boot/bootx64.efi` after mounting `/boot`.
