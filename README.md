@@ -13,8 +13,9 @@ modifying their source code.
 ### build-kernel
 
 Builds and updates kernels. It will automatically migrate kernel
-configurations and reinstall modules. If `/etc/efikeys` exists and contains
-the files _db.key_ and _db.crt_, they will be used for signing the kernel.
+configurations and reinstall modules. If the directory `/etc/efikeys/`
+contains the files _db.key_ and _db.crt_, they will be used to sign the
+kernel.
 
 **Note**: This script assumes that your kernel can boot itself and will
 install it to `/boot/efi/boot/bootx64.efi` after mounting `/boot`.
@@ -27,8 +28,7 @@ not belong to any installed package.
 ### ppack
 
 Creates project archives. It will append the timestamp of either the newest
-file or the latest commit to the archive name. Only git is supported. If
-git is not installed, it will fallback to searching the most recent file.
+file or the latest git commit to the archive name.
 
 ### nb-sync
 
