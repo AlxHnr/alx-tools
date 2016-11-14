@@ -30,7 +30,8 @@ nb "$current" gc
 
 test ! -e "$old/config"   || cp "$old/config" "$old/config.bak"
 test ! -e "$old/metadata" || cp "$old/metadata" "$old/metadata.bak"
-rm "$old/config" "$old/metadata"
+test ! -e "$old/config"   || rm "$old/config"
+test ! -e "$old/metadata" || rm "$old/metadata"
 
 cp -rn "$current"/* "$old/" ||
   {
