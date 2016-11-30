@@ -86,7 +86,7 @@ for package in "${!paths[@]}"; do
   # the projects directory.
   (cd "$tmp_dir" && tar xf "$package-$latest_tag.tar.gz")
 
-  diff_command=(diff -rq)
+  diff_command=(diff -rq --no-dereference)
   test -f "$project_search_path/$package/.gitignore" && \
     diff_command+=("-X" "$project_search_path/$package/.gitignore")
   "${diff_command[@]}" -x ".git" "$project_search_path/$package" \
