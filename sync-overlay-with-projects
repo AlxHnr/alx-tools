@@ -103,7 +103,7 @@ for package in "${!paths[@]}"; do
   git reset
   git rm --ignore-unmatch "$old_ebuild_path"
   git add "$new_ebuild_path" "$ebuild_directory/Manifest"
-  git commit -m "Updated $package to $latest_tag"
+  git commit -S -m "Updated $package to $latest_tag"
   ebuilds_updated=true
 done
 
