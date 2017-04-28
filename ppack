@@ -113,7 +113,8 @@ function packdir
          sed 's/^Would remove //' | sed 's/\/*$//' |
          while read line; do echo "--exclude=$ignore_root/$line"; done
       done
-  } | xargs -d '\n' tar caf "$archive_path" "$project_name"
+    printf "%s\n" "$project_name"
+  } | xargs -d '\n' tar caf "$archive_path"
 
   extra_info="$(du -h "$archive_path" | grep -oE '^\S+')${extra_info}"
   echo "packed: $project_name ($extra_info)"
