@@ -1,9 +1,4 @@
-A collection of scripts and hacks i have written over the years, mostly for
-maintaining my Gentoo system. This is free software, released into the
-public domain. See the LICENSE file for more informations.
-
-These tools can be installed directly from my
-[Gentoo overlay](https://github.com/AlxHnr/gentoo-overlay).
+# Unmaintained scripts
 
 ## Provided tools
 
